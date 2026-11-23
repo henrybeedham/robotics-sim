@@ -6,7 +6,15 @@
  * components read in their render loop. Anything the panels show is $state.
  */
 import { Matrix4, Quaternion, Vector3 } from 'three';
-import { type Joints, type Kinematics, forward, inverse, HOME, JOINT_SPEED, RAIL } from './robot';
+import {
+	type Joints,
+	type Kinematics,
+	forward,
+	inverse,
+	HOME,
+	JOINT_SPEED,
+	RAIL
+} from './robot.js';
 import {
 	type MouldId,
 	type Offset2,
@@ -26,8 +34,8 @@ import {
 	rayToMould,
 	standOff,
 	stationXs
-} from './cell';
-import { rng } from './random';
+} from './cell.js';
+import { rng } from './random.js';
 
 export type Angle = 0 | 45 | -45 | 90;
 export const ANGLES: Angle[] = [0, 45, -45, 90];

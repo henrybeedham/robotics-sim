@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Matrix4, Vector3 } from 'three';
-import { forward, inverse, HOME, type Joints } from './robot';
+import { forward, inverse, HOME, type Joints } from './robot.js';
 import {
 	MOULDS,
 	kitPose,
@@ -9,8 +9,8 @@ import {
 	stationXs,
 	conformProfile,
 	cornerDeviation
-} from './cell';
-import { Simulation } from './engine.svelte';
+} from './cell.js';
+import { Simulation } from './engine.svelte.js';
 
 const close = (a: Matrix4, b: Matrix4, eps = 1e-6) =>
 	a.elements.every((v, i) => Math.abs(v - b.elements[i]) < eps);

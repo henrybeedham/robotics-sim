@@ -4,7 +4,7 @@
  * without a renderer. World frame is Z-up, metres.
  */
 import { Matrix4, Vector3 } from 'three';
-import { toolPose } from './robot';
+import { toolPose } from './robot.js';
 
 export type MouldId = 'wing' | 'saddle' | 'flat';
 
