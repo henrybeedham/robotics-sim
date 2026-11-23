@@ -1,24 +1,39 @@
+<script lang="ts" module>
+	export interface CameraView {
+		position: [number, number, number];
+		target: [number, number, number];
+	}
+</script>
+
 <script lang="ts">
+	/**
+	 * Camera, lights and floor shared by every cell. Children are modelled Z-up in
+	 * metres and turned Y-up here. In demo mode the camera turns slowly on its own
+	 * and the visitor cannot move it.
+	 */
+	import type { Snippet } from 'svelte';
 	import { T, useThrelte } from '@threlte/core';
 	import { OrbitControls, Grid } from '@threlte/extras';
 	import { mode } from 'mode-watcher';
-	import type { Simulation } from '#lib/sim/engine.svelte.js';
-	import Robot from './Robot.svelte';
-	import Fixtures from './Fixtures.svelte';
-	import Ply from './Ply.svelte';
-	import Sensors from './Sensors.svelte';
 
-	let { sim, view }: { sim: Simulation; view: number } = $props();
+	let {
+		views,
+		view = 0,
+		demo = false,
+		extent = 4,
+		children
+	}: {
+		views: CameraView[];
+		view?: number;
+		demo?: boolean;
+		/** Half-width of the area that casts shadows, metres. */
+		extent?: number;
+		children: Snippet;
+	} = $props();
 
 	const dark = $derived(mode.current === 'dark');
-
-	// Camera presets in Y-up coordinates (the cell itself is modelled Z-up).
-	const views: { position: [number, number, number]; target: [number, number, number] }[] = [
-		{ position: [4.6, 3.1, 2.2], target: [0, 0.75, -0.1] },
-		{ position: [0.01, 6.2, -0.05], target: [0, 0.6, -0.05] },
-		{ position: [0.4, 1.9, -3.6], target: [0, 0.9, -1.0] }
-	];
 	const { size } = useThrelte();
+
 	const preset = $derived.by(() => {
 		const v = views[view] ?? views[0];
 		// Portrait screens see less width, so pull the camera back to keep the whole cell in frame.
@@ -33,13 +48,16 @@
 	});
 </script>
 
-<T.PerspectiveCamera makeDefault position={preset.position} fov={38} near={0.05} far={60}>
+<T.PerspectiveCamera makeDefault position={preset.position} fov={38} near={0.05} far={80}>
 	<OrbitControls
 		target={preset.target}
 		enableDamping
+		enabled={!demo}
+		autoRotate={demo}
+		autoRotateSpeed={0.6}
 		maxPolarAngle={Math.PI / 2 - 0.05}
-		minDistance={1.2}
-		maxDistance={14}
+		minDistance={1}
+		maxDistance={20}
 	/>
 </T.PerspectiveCamera>
 
@@ -49,17 +67,18 @@
 <T.DirectionalLight
 	position={[3.5, 7, 2.5]}
 	intensity={dark ? 1.8 : 2.2}
-	castShadow
+	castShadow={!demo}
 	shadow.mapSize={[2048, 2048]}
-	shadow.camera.left={-4}
-	shadow.camera.right={4}
-	shadow.camera.top={4}
-	shadow.camera.bottom={-4}
+	shadow.camera.left={-extent}
+	shadow.camera.right={extent}
+	shadow.camera.top={extent}
+	shadow.camera.bottom={-extent}
+	shadow.camera.far={30}
 	shadow.bias={-0.0004}
 />
 
 <T.Mesh rotation.x={-Math.PI / 2} position.y={-0.001} receiveShadow>
-	<T.PlaneGeometry args={[40, 40]} />
+	<T.PlaneGeometry args={[60, 60]} />
 	<T.ShadowMaterial opacity={dark ? 0.45 : 0.22} />
 </T.Mesh>
 <Grid
@@ -67,16 +86,10 @@
 	sectionColor={dark ? '#4a4540' : '#bfb6a6'}
 	cellSize={0.25}
 	sectionSize={1}
-	gridSize={[24, 24]}
-	fadeDistance={16}
+	gridSize={[30, 30]}
+	fadeDistance={20}
 />
 
-<!-- Everything below is modelled Z-up; this turns it Y-up for three.js. -->
 <T.Group rotation.x={-Math.PI / 2}>
-	<Fixtures mould={sim.config.mould} />
-	<Robot {sim} />
-	{#each sim.plies as ply (ply.index + ':' + ply.angle + ':' + sim.config.seed)}
-		<Ply {sim} index={ply.index} />
-	{/each}
-	<Sensors {sim} />
+	{@render children()}
 </T.Group>

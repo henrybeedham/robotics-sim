@@ -8,7 +8,7 @@
 	import { onDestroy } from 'svelte';
 	import { KIT, MOULD, PLY, placePose, rayToMould } from '#lib/sim/cell.js';
 	import type { Simulation } from '#lib/sim/engine.svelte.js';
-	import { fan, frustum, laser } from './materials';
+	import { fan, frustum, laser } from '../common/materials';
 
 	let { sim }: { sim: Simulation } = $props();
 

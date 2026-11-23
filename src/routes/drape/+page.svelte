@@ -10,7 +10,7 @@
 	import { Simulation } from '#lib/sim/engine.svelte.js';
 	import { MOULDS, PLY_MASS } from '#lib/sim/cell.js';
 	import { angleLabel, clock, fixed, when } from '#lib/format.js';
-	import Viewport from '#lib/scene/Viewport.svelte';
+	import View from '#lib/scene/drape/View.svelte';
 	import Segmented from '#lib/components/drape/Segmented.svelte';
 	import Settings from '#lib/components/drape/Settings.svelte';
 	import PlyBook from '#lib/components/drape/PlyBook.svelte';
@@ -113,7 +113,7 @@
 		aria-label="3D view of the cell"
 	>
 		{#if browser}
-			<Viewport {sim} {view} />
+			<View {sim} {view} />
 		{/if}
 		<div
 			class="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-3"

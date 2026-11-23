@@ -3,7 +3,7 @@
 	import { T } from '@threlte/core';
 	import { DoubleSide, MeshStandardMaterial } from 'three';
 	import { KIT, MOULD, type MouldId } from '#lib/sim/cell.js';
-	import { darkPaint, steel, tableTop } from './materials';
+	import { darkPaint, steel, tableTop } from '../common/materials';
 	import { mouldGeometry } from './meshes';
 
 	let { mould }: { mould: MouldId } = $props();

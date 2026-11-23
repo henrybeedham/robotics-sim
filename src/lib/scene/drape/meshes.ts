@@ -1,6 +1,6 @@
 import { BufferAttribute, BufferGeometry } from 'three';
 import { MOULD, PLY, PLY_GRID, mouldHeight, type MouldId } from '#lib/sim/cell.js';
-import { FIBRE_TILE } from './materials';
+import { FIBRE_TILE } from '../common/materials';
 
 /** A solid mould block: the curved tool face plus skirts down to its base. */
 export function mouldGeometry(id: MouldId) {

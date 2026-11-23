@@ -1,36 +1,38 @@
 <script lang="ts">
+	/**
+	 * The six-axis arm from `#lib/sim/robot`, drawn Z-up. Its pose is pulled from
+	 * `source` every frame. The tool snippet is drawn in the TCP frame (+X is the
+	 * approach direction).
+	 */
+	import type { Snippet } from 'svelte';
 	import { T, useTask } from '@threlte/core';
-	import { ARM, HOME, RAIL, type Joints } from '#lib/sim/robot.js';
-	import type { Simulation } from '#lib/sim/engine.svelte.js';
-	import { paint, darkPaint, steel } from './materials';
-	import Gripper from './Gripper.svelte';
+	import type { Material } from 'three';
+	import { ARM, HOME, type Joints } from '#lib/sim/robot.js';
+	import { paint as amber, darkPaint, steel } from './materials';
 
-	let { sim }: { sim: Simulation } = $props();
+	let {
+		source,
+		paint = amber,
+		tool
+	}: {
+		source: { q: Joints; rail: number };
+		paint?: Material;
+		tool?: Snippet;
+	} = $props();
 
 	let q = $state.raw<Joints>([...HOME]);
 	let rail = $state(0);
 
 	useTask(
 		() => {
-			q = sim.q;
-			rail = sim.rail;
+			q = source.q;
+			rail = source.rail;
 		},
 		{ after: 'simulation' }
 	);
 
-	const railLength = RAIL.max - RAIL.min + 0.8;
 	const h = Math.PI / 2;
 </script>
-
-<!-- Linear rail on the floor -->
-{#each [-0.17, 0.17] as y (y)}
-	<T.Mesh position={[0, y, 0.05]} material={steel} castShadow receiveShadow>
-		<T.BoxGeometry args={[railLength, 0.07, 0.1]} />
-	</T.Mesh>
-{/each}
-<T.Mesh position={[0, 0, 0.02]} material={darkPaint} receiveShadow>
-	<T.BoxGeometry args={[railLength, 0.5, 0.04]} />
-</T.Mesh>
 
 <T.Group position.x={rail}>
 	<!-- Carriage and riser -->
@@ -86,7 +88,7 @@
 									<T.CylinderGeometry args={[0.06, 0.06, 0.04, 24]} />
 								</T.Mesh>
 								<T.Group position={[ARM.d6 + ARM.tool, 0, 0]}>
-									<Gripper {sim} />
+									{@render tool?.()}
 								</T.Group>
 							</T.Group>
 						</T.Group>

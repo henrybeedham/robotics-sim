@@ -8,7 +8,7 @@
 	import { ARM } from '#lib/sim/robot.js';
 	import { CUPS, CUP_STROKE } from '#lib/sim/cell.js';
 	import type { Simulation } from '#lib/sim/engine.svelte.js';
-	import { darkPaint, steel, rubber, vacuumOn } from './materials';
+	import { darkPaint, steel, rubber, vacuumOn } from '../common/materials';
 
 	let { sim }: { sim: Simulation } = $props();
 

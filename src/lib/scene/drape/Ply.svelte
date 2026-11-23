@@ -3,7 +3,7 @@
 	import { DoubleSide, MeshStandardMaterial, Color, BufferAttribute } from 'three';
 	import { onDestroy } from 'svelte';
 	import type { Simulation } from '#lib/sim/engine.svelte.js';
-	import { fibreTexture } from './materials';
+	import { fibreTexture } from '../common/materials';
 	import { plyGeometry } from './meshes';
 
 	let { sim, index }: { sim: Simulation; index: number } = $props();
