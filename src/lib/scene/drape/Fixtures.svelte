@@ -9,6 +9,7 @@
 	import Stand from '../common/Stand.svelte';
 	import Guarding from '../common/Guarding.svelte';
 	import { mouldGeometry } from './meshes';
+	import { polished } from '../common/textures';
 
 	let { mould }: { mould: MouldId } = $props();
 
@@ -19,9 +20,10 @@
 	});
 	const toolFace = new MeshStandardMaterial({
 		color: '#bdb8af',
-		roughness: 0.3,
+		roughness: 1,
 		metalness: 0.75,
-		side: DoubleSide
+		side: DoubleSide,
+		roughnessMap: polished()
 	});
 
 	const lens = new MeshStandardMaterial({ color: '#0d1620', roughness: 0.05, metalness: 0.9 });

@@ -5,7 +5,11 @@ export const CELLS = [
 		name: 'Drape',
 		line: 'Conformal pick-and-place of carbon plies onto a curved mould'
 	},
-	{ id: 'reach', name: 'Reach', line: 'A snake arm threading rib holes inside a wing box' },
+	{
+		id: 'reach',
+		name: 'Reach',
+		line: 'A snake arm exploring five structures, up to a maze. Drive it yourself.'
+	},
 	{ id: 'stack', name: 'Stack', line: 'Palletising hot billets from a moving conveyor' },
 	{ id: 'tandem', name: 'Tandem', line: 'Two gantries sharing one rail over a long mould' }
 ] as const;

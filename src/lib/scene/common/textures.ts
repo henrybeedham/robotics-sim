@@ -121,8 +121,9 @@ export const polished = () =>
 		return paint(
 			size,
 			(x, y, i) => {
-				const swirl = Math.sin(Math.hypot(x - size / 2, y - size / 2) / 3 + n[i] * 12) * 0.5 + 0.5;
-				return grey(0.18 + 0.18 * n[i] + 0.06 * swirl);
+				// Random-orbit sanding marks: short arcs, broken up by noise.
+				const swirl = Math.sin(x * 0.9 + Math.sin(y * 0.21 + n[i] * 9) * 6 + n[i] * 30) * 0.5 + 0.5;
+				return grey(0.2 + 0.2 * n[i] + 0.035 * swirl);
 			},
 			false
 		);
@@ -178,6 +179,13 @@ export const scale = (as: 'colour' | 'bump') =>
 		);
 	});
 
+/** Glow across hot steel: soft, low-contrast patches, brighter in the middle of faces. */
+export const glow = () =>
+	once('glow', () => {
+		const n = fbm(128, 3, 3, 43);
+		return paint(128, (_x, _y, i) => grey(0.72 + 0.28 * n[i]), true);
+	});
+
 /** Hot-dip galvanising: crystal spangle, as a colour map. */
 export const spangle = () =>
 	once('spangle', () => {
@@ -229,7 +237,7 @@ export const worn = () =>
 		const n = fbm(256, 8, 5, 71);
 		return paint(
 			256,
-			(_x, _y, i) => grey(n[i] > 0.68 ? 0.55 + 0.3 * (1 - n[i]) : 0.95 + 0.05 * n[i]),
+			(_x, _y, i) => grey(n[i] > 0.72 ? 0.7 + 0.2 * (1 - n[i]) : 0.95 + 0.05 * n[i]),
 			true
 		);
 	});

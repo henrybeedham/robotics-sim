@@ -18,14 +18,15 @@
 	} from '../common/materials';
 	import { cyl, rbox } from '../common/shapes';
 	import Arm from '../common/Arm.svelte';
+	import { wood as grain } from '../common/textures';
 	import Guarding from '../common/Guarding.svelte';
 
 	let { sim }: { sim: Stack } = $props();
 
 	const len = CONVEYOR.x1 - CONVEYOR.x0;
 	const cx = (CONVEYOR.x0 + CONVEYOR.x1) / 2;
-	const wood = new MeshStandardMaterial({ color: '#b39066', roughness: 0.92 });
-	const woodDark = new MeshStandardMaterial({ color: '#94744f', roughness: 0.92 });
+	const wood = new MeshStandardMaterial({ color: '#b39066', roughness: 0.92, map: grain() });
+	const woodDark = new MeshStandardMaterial({ color: '#94744f', roughness: 0.92, map: grain() });
 
 	// Rollers along the conveyor.
 	const PITCH = 0.16;

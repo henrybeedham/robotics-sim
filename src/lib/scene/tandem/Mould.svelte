@@ -4,10 +4,11 @@
 	import { BufferAttribute, BufferGeometry, DoubleSide, MeshStandardMaterial } from 'three';
 	import { KITS, MOULD, RAILS, mouldHeight } from '#lib/sim/tandem.svelte.js';
 	import { bright, darkPaint, steel, structure, tooling } from '../common/materials';
-	import { rbox } from '../common/shapes';
+	import { rbox, worldUVs } from '../common/shapes';
 	import Stand from '../common/Stand.svelte';
 	import Table from '../common/Table.svelte';
 	import Guarding from '../common/Guarding.svelte';
+	import { polished } from '../common/textures';
 
 	const nx = 40;
 	const ny = 16;
@@ -28,11 +29,13 @@
 	face.setAttribute('position', new BufferAttribute(new Float32Array(pos), 3));
 	face.setIndex(idx);
 	face.computeVertexNormals();
+	worldUVs(face, 0.8);
 	const toolFace = new MeshStandardMaterial({
 		color: '#bdb8af',
-		roughness: 0.3,
+		roughness: 1,
 		metalness: 0.75,
-		side: DoubleSide
+		side: DoubleSide,
+		roughnessMap: polished()
 	});
 
 	const len = MOULD.x1 - MOULD.x0;

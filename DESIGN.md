@@ -36,6 +36,11 @@ that go round a composites shop with each part.
 - Detail parts share cached geometry (`scene/common/shapes.ts`): rounded boxes for
   castings and profiles, cylinders for motors and hubs. A studio environment map gives
   metals and clear-coat paint something to reflect.
+- Textures are generated on canvases from seeded, tileable noise (`textures.ts`): clear-coat
+  orange peel, cast grain, brushed and polished metal, concrete, timber, mill scale,
+  galvanised spangle, primer with fastener rows, worn safety paint. Colour maps stay near
+  white and multiply the material colour; roughness and bump maps carry the detail. Parts
+  use world-unit UVs so texture scale is constant.
 - Every cell uses the same `Stage` (camera presets, lights, floor). Landing tiles run it in
   demo mode: slow auto-orbit, no shadows, 1× pixel ratio.
 

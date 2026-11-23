@@ -1,6 +1,7 @@
 import { BufferAttribute, BufferGeometry } from 'three';
 import { MOULD, PLY, PLY_GRID, mouldHeight, type MouldId } from '#lib/sim/cell.js';
 import { FIBRE_TILE } from '../common/materials';
+import { worldUVs } from '../common/shapes';
 
 /** A solid mould block: the curved tool face plus skirts down to its base. */
 export function mouldGeometry(id: MouldId) {
@@ -46,7 +47,7 @@ export function mouldGeometry(id: MouldId) {
 	g.setAttribute('position', new BufferAttribute(new Float32Array(positions), 3));
 	g.setIndex(indices);
 	g.computeVertexNormals();
-	return g;
+	return worldUVs(g, 0.6);
 }
 
 /** A ply sheet. Positions are filled each frame; UVs carry the fibre angle. */

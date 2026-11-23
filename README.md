@@ -25,7 +25,7 @@ The landing page (`/`) shows each cell running live. Finished runs are saved to 
 | 3D scenes (Threlte / three.js)                 | `src/lib/scene/`                                      |
 | Run storage                                    | `src/lib/server/runs.ts`, `src/lib/server/results.ts` |
 
-Tests (`src/lib/sim/*.test.ts`) cover IK round trips and reachability, snake-arm planning and re-routing, filling a pallet in both picking modes, collision-free gantry schedules, and two gantries beating one.
+Tests (`src/lib/sim/*.test.ts`) cover IK round trips and reachability, snake-arm planning in every structure (never through a wall), re-routing and manual driving, filling a pallet in both picking modes, collision-free gantry schedules, and two gantries beating one.
 
 ## Running it
 

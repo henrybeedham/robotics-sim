@@ -13,8 +13,10 @@
 	 */
 	import type { Snippet } from 'svelte';
 	import { T, useTask, useThrelte } from '@threlte/core';
-	import { PerspectiveCamera, Vector3 } from 'three';
-	import { OrbitControls, Grid } from '@threlte/extras';
+	import { Fog, MeshStandardMaterial, PerspectiveCamera, Vector3 } from 'three';
+	import { dressShared } from './materials';
+	import { concrete } from './textures';
+	import { OrbitControls } from '@threlte/extras';
 	import { mode } from 'mode-watcher';
 	import Environment from './Environment.svelte';
 
@@ -61,7 +63,28 @@
 	);
 
 	const dark = $derived(mode.current === 'dark');
-	const { size } = useThrelte();
+	const { size, scene } = useThrelte();
+
+	dressShared();
+
+	// Concrete floor: one texture tile per 2 m, fading into the page with fog.
+	const FLOOR = 80;
+	const floor = new MeshStandardMaterial({
+		map: concrete('colour'),
+		roughnessMap: concrete('rough'),
+		bumpMap: concrete('bump'),
+		bumpScale: 0.6
+	});
+	for (const t of [floor.map, floor.roughnessMap, floor.bumpMap])
+		t?.repeat.set(FLOOR / 2, FLOOR / 2);
+	$effect(() => {
+		floor.color.set(dark ? '#55504a' : '#d9d3c8');
+		// Match the page's --scene-bg so the floor's edge disappears.
+		scene.fog = new Fog(dark ? '#1d1b19' : '#efebe3', 14, 38);
+		return () => {
+			scene.fog = null;
+		};
+	});
 
 	const preset = $derived.by(() => {
 		const v = views[view] ?? views[0];
@@ -111,18 +134,9 @@
 	shadow.bias={-0.0004}
 />
 
-<T.Mesh rotation.x={-Math.PI / 2} position.y={-0.001} receiveShadow>
-	<T.PlaneGeometry args={[60, 60]} />
-	<T.ShadowMaterial opacity={dark ? 0.45 : 0.22} />
+<T.Mesh rotation.x={-Math.PI / 2} position.y={-0.001} receiveShadow material={floor}>
+	<T.PlaneGeometry args={[FLOOR, FLOOR]} />
 </T.Mesh>
-<Grid
-	cellColor={dark ? '#34312d' : '#d8d1c4'}
-	sectionColor={dark ? '#4a4540' : '#bfb6a6'}
-	cellSize={0.25}
-	sectionSize={1}
-	gridSize={[30, 30]}
-	fadeDistance={20}
-/>
 
 <T.Group rotation.x={-Math.PI / 2}>
 	{@render children()}

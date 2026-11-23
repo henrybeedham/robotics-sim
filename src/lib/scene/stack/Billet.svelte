@@ -5,10 +5,20 @@
 	import { onDestroy } from 'svelte';
 	import { BILLET, type Billet, type Stack } from '#lib/sim/stack.svelte.js';
 	import { rbox } from '../common/shapes';
+	import { glow, scale } from '../common/textures';
 
 	let { sim, billet }: { sim: Stack; billet: Billet } = $props();
 
-	const material = new MeshStandardMaterial({ color: '#3b3734', roughness: 0.85, metalness: 0.35 });
+	const material = new MeshStandardMaterial({
+		color: '#3b3734',
+		roughness: 0.85,
+		metalness: 0.35,
+		map: scale('colour'),
+		bumpMap: scale('bump'),
+		bumpScale: 2,
+		// Scale flakes glow less than the bare steel between them.
+		emissiveMap: glow()
+	});
 	const mesh = new Mesh(undefined, material);
 	mesh.matrixAutoUpdate = false;
 	mesh.castShadow = true;
@@ -26,9 +36,9 @@
 			const t = temperature(sim.time - billet.born);
 			// Visible glow from about 480 °C: dull cherry red, deepening to orange when hottest.
 			const k = Math.max(0, Math.min(1, (t - 480) / 420));
-			hot.setRGB(0.75, 0.12 + 0.2 * k, 0.02 * k);
+			hot.setRGB(0.8, 0.1 + 0.16 * k, 0.015 * k);
 			material.emissive.copy(hot);
-			material.emissiveIntensity = 0.15 + 0.75 * k * k;
+			material.emissiveIntensity = 0.15 + 0.85 * k * k;
 		},
 		{ after: 'simulation' }
 	);

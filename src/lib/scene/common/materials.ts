@@ -1,3 +1,4 @@
+import * as tex from './textures';
 import {
 	CanvasTexture,
 	Color,
@@ -179,6 +180,46 @@ export function structureMaterials(id: string) {
 					: id === 'maze'
 						? { wall: m('#d8d3c7', 0.7, 0.05), plate: m('#d8d3c7', 0.7, 0.05), tube: primer }
 						: { wall: primer, plate: primer, tube: primer };
+	if (typeof document !== 'undefined') {
+		if (id === 'ducts') {
+			tex.dress(set.wall, { map: tex.spangle(), roughnessMap: tex.brushed('rough') });
+		} else if (id === 'exchanger') {
+			tex.dress(set.wall, { bumpMap: tex.cast(), bumpScale: 1.5 });
+			tex.dress(set.tube, { map: tex.brushed('colour'), roughnessMap: tex.brushed('rough') });
+		} else if (id === 'maze') {
+			tex.dress(set.wall, { bumpMap: tex.fine(), bumpScale: 0.6 });
+		} else {
+			tex.dress(set.wall, {
+				map: tex.primer('colour'),
+				bumpMap: tex.primer('bump'),
+				bumpScale: 1.2
+			});
+			if (set.plate !== set.wall)
+				tex.dress(set.plate, {
+					map: tex.primer('colour'),
+					bumpMap: tex.primer('bump'),
+					bumpScale: 1.2
+				});
+		}
+	}
 	structureSets.set(id, set);
 	return set;
+}
+
+/** Give the shared materials their surface textures. Browser only; safe to call repeatedly. */
+export function dressShared() {
+	if (typeof document === 'undefined') return;
+	tex.dress(paint, { bumpMap: tex.peel(), bumpScale: 0.5 });
+	tex.dress(darkPaint, { bumpMap: tex.cast(), bumpScale: 1.2 });
+	tex.dress(castBlack, { bumpMap: tex.cast(), bumpScale: 1.5 });
+	tex.dress(structure, { bumpMap: tex.cast(), bumpScale: 1 });
+	tex.dress(aluminium, { map: tex.brushed('colour'), roughnessMap: tex.brushed('rough') });
+	tex.dress(steel, { map: tex.brushed('colour'), roughnessMap: tex.brushed('rough') });
+	tex.dress(bright, { roughnessMap: tex.brushed('rough') });
+	if (!tooling.userData.dressed) tooling.roughness = 1;
+	tex.dress(tooling, { roughnessMap: tex.polished(), bumpMap: tex.fine(), bumpScale: 0.15 });
+	tex.dress(tableTop, { bumpMap: tex.fine(), bumpScale: 0.3 });
+	tex.dress(rubber, { bumpMap: tex.fine(), bumpScale: 0.8 });
+	tex.dress(safety, { map: tex.worn() });
+	tex.dress(cable, { bumpMap: tex.fine(), bumpScale: 0.5 });
 }
