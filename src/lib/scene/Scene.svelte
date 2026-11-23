@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { T } from '@threlte/core';
+	import { T, useThrelte } from '@threlte/core';
 	import { OrbitControls, Grid } from '@threlte/extras';
 	import { mode } from 'mode-watcher';
 	import type { Simulation } from '#lib/sim/engine.svelte.js';
@@ -18,7 +18,19 @@
 		{ position: [0.01, 6.2, -0.05], target: [0, 0.6, -0.05] },
 		{ position: [0.4, 1.9, -3.6], target: [0, 0.9, -1.0] }
 	];
-	const preset = $derived(views[view] ?? views[0]);
+	const { size } = useThrelte();
+	const preset = $derived.by(() => {
+		const v = views[view] ?? views[0];
+		// Portrait screens see less width, so pull the camera back to keep the whole cell in frame.
+		const aspect = $size.width / Math.max($size.height, 1);
+		const k = aspect < 1 ? Math.min(1.9, 1 / aspect + 0.15) : 1;
+		const position = v.position.map((p, i) => v.target[i] + (p - v.target[i]) * k) as [
+			number,
+			number,
+			number
+		];
+		return { position, target: v.target };
+	});
 </script>
 
 <T.PerspectiveCamera makeDefault position={preset.position} fov={38} near={0.05} far={60}>

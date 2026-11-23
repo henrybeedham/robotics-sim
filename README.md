@@ -1,56 +1,61 @@
-# sv
+<img src="assets/icon.svg" width="64" height="64" alt="">
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+# Drape
 
-## Creating a project
+**A robotic composite layup cell, simulated in the browser.**
 
-If you're seeing this, you've probably already done this step. Congrats!
+A six-axis arm on a linear rail picks cut carbon plies from a kitting table using a
+conformal vacuum gripper. Each of the gripper's 18 cups extends to the height of the mould
+surface below it, so a flat ply can be draped onto a doubly curved tool in one motion.
+After each ply is placed, a laser line scanner checks it against a tolerance.
 
-```sh
-# create a new project
-npx sv create my-app
-```
+You can edit the ply book, switch vision-guided picking on and off, change the robot's
+repeatability, speed override and mould shape, and compare cycle time, deposition rate and
+placement accuracy. Finished runs are saved to a shared results table.
 
-To recreate this project with the same configuration:
+## What's inside
 
-```sh
-# recreate this project
-bun x sv@1.7.0 create --template minimal --types ts --add prettier eslint tailwindcss="plugins:none" vitest="usages:unit" --install bun .
-```
+| Area          | Where                                           | Notes                                                                                                                                                                              |
+| ------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kinematics    | `src/lib/sim/robot.ts`                          | Closed-form IK for a 6R arm with a spherical wrist, plus a rail axis. Elbow-up branch, consistent wrist configuration, joint limits                                                |
+| Cell geometry | `src/lib/sim/cell.ts`                           | Mould surfaces (wing skin, saddle, flat), ray-to-surface, conformal gripper profile, planar pose algebra                                                                           |
+| Simulation    | `src/lib/sim/engine.svelte.ts`                  | Plans each cycle as joint and Cartesian segments with quintic profiles, timed to joint speed limits. Applies seeded kitting, vision and repeatability errors, then scores each ply |
+| 3D            | `src/lib/scene/`                                | Threlte (three.js for Svelte). The renderer pulls hot state each frame, and panels read a 10 Hz readout                                                                            |
+| Results       | `src/lib/server/runs.ts`, `src/routes/api/runs` | SQLite via `node:sqlite`, with validated, rate-limited posts                                                                                                                       |
 
-## Adding features
+Tests in `src/lib/sim/sim.test.ts` cover IK round trips, reachability of every target on
+every mould, and a full headless layup. They also check that vision-guided picking beats
+blind picking.
 
-Add features to your project with `sv add`:
-
-```sh
-npx sv add
-```
-
-For example, to add Tailwind CSS:
-
-```sh
-npx sv add tailwindcss
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Running it
 
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+bun install
+bun run dev          # http://localhost:5173
+bun run test         # unit tests
+bun run check        # svelte-check
+bun run lint
+bun run build && node build
 ```
 
-## Building
+Needs Node 22.17 or later, because it uses `node:sqlite`. Bun installs packages; Node
+runs the app.
 
-To create a production version of your app:
+## Deploying on Coolify
 
-```sh
-npm run build
-```
+1. **New Resource → Private Repository (with GitHub App)**, pick this repo and branch `main`.
+2. Build pack: **Docker Compose**; compose file `/docker-compose.yml`.
+3. On the `app` service, set the domain with the container port, e.g. `https://drape.example.com:3000`.
+4. Optionally adjust the environment variables Coolify lists (see `.env.example`). None are required.
+5. Deploy. Pushes to `main` redeploy automatically.
 
-You can preview the production build with `npm run preview`.
+Data lives in the `app-data` volume (`/data`). That holds the SQLite database and its
+automatic backups, which are taken before each migration and on each new version (the
+newest 10 are kept). Include that volume in your server backups, or turn on Coolify's
+volume backups, for an off-site copy.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Background
+
+Built by Henry Beedham as an independent study of automated composite preforming: kitting,
+conformal pick-and-place, tacking and in-process inspection. It isn't affiliated with any
+manufacturer, and every figure comes from the simulation.

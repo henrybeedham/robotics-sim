@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#d97706"/>
-  <text x="32" y="32" dy="0.35em" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="26" font-weight="600" fill="#ffffff">RS</text>
+  <rect width="64" height="64" fill="#2d2b28"/>
+  <path d="M10 42 Q32 22 54 42" fill="none" stroke="#d4861f" stroke-width="5"/>
+  <path d="M10 52 Q32 32 54 52" fill="none" stroke="#e3ded4" stroke-width="2.5" stroke-dasharray="4 4"/>
+  <rect x="24" y="8" width="16" height="10" fill="#e3ded4"/>
 </svg>

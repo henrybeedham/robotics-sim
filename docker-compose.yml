@@ -1,0 +1,22 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    # No published port: Coolify's proxy routes to 3000. Set the domain in Coolify as
+    # https://your.domain:3000. To reach it directly while testing, add: ports: ['3000:3000']
+    expose:
+      - '3000'
+    environment:
+      DATA_DIR: /data
+      # Trust Coolify's proxy for the public URL and visitor IP (safe: the port isn't published).
+      PROTOCOL_HEADER: x-forwarded-proto
+      HOST_HEADER: x-forwarded-host
+      ADDRESS_HEADER: x-forwarded-for
+      XFF_DEPTH: '1'
+      BODY_SIZE_LIMIT: ${BODY_SIZE_LIMIT:-64K}
+      RUN_HISTORY_LIMIT: ${RUN_HISTORY_LIMIT:-500}
+    volumes:
+      - app-data:/data
+
+volumes:
+  app-data:

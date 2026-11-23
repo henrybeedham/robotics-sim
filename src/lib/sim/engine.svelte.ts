@@ -60,7 +60,7 @@ export const DEFAULT_CONFIG: Config = {
 	layers: [0, 45, -45, -45, 45, 0],
 	stations: 3,
 	vision: true,
-	repeatability: 0.6,
+	repeatability: 0.4,
 	tolerance: 2,
 	override: 80,
 	seed: 1998
@@ -438,7 +438,7 @@ export class Simulation {
 	/** Advance by `realDt` seconds of wall time. */
 	tick(realDt: number) {
 		if (this.status !== 'running') return;
-		let dt = Math.min(realDt, 0.1) * this.warp;
+		let dt = Math.min(realDt, 0.25) * this.warp;
 
 		if (this.scan) {
 			this.scan.progress = Math.min(1, this.scan.progress + dt / SCAN_TIME);

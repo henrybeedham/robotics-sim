@@ -1,5 +1,5 @@
 {
-	"name": "robotics-sim",
+	"name": "drape",
 	"version": "0.0.1",
 	"private": true,
 	"type": "module",
@@ -58,5 +58,9 @@
 		"@threlte/core": "^8.7.0",
 		"@threlte/extras": "^9.23.1",
 		"three": "^0.187.0"
-	}
+	},
+	"engines": {
+		"node": ">=22.17"
+	},
+	"description": "A browser simulation of a robotic composite ply layup cell."
 }
