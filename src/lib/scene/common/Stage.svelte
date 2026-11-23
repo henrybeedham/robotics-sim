@@ -12,7 +12,8 @@
 	 * and the visitor cannot move it.
 	 */
 	import type { Snippet } from 'svelte';
-	import { T, useThrelte } from '@threlte/core';
+	import { T, useTask, useThrelte } from '@threlte/core';
+	import { PerspectiveCamera, Vector3 } from 'three';
 	import { OrbitControls, Grid } from '@threlte/extras';
 	import { mode } from 'mode-watcher';
 	import Environment from './Environment.svelte';
@@ -22,6 +23,7 @@
 		view = 0,
 		demo = false,
 		extent = 4,
+		follow,
 		children
 	}: {
 		views: CameraView[];
@@ -29,8 +31,34 @@
 		demo?: boolean;
 		/** Half-width of the area that casts shadows, metres. */
 		extent?: number;
+		/**
+		 * A first-person view: when `view` equals `follow.view`, the camera rides
+		 * on whatever `follow.pose()` returns (Z-up position and heading).
+		 */
+		follow?: { view: number; pose: () => { pos: Vector3; dir: Vector3 } | null };
 		children: Snippet;
 	} = $props();
+
+	const following = $derived(follow !== undefined && view === follow.view);
+	const rider = new PerspectiveCamera(72, 1, 0.004, 40);
+	const eye = new Vector3();
+	const ahead = new Vector3();
+	useTask(
+		() => {
+			if (!following || !follow) return;
+			const p = follow.pose();
+			if (!p) return;
+			// Z-up model space to three.js Y-up: (x, y, z) -> (x, z, -y).
+			eye.set(p.pos.x, p.pos.z, -p.pos.y);
+			ahead.set(p.pos.x + p.dir.x, p.pos.z + p.dir.z, -(p.pos.y + p.dir.y));
+			eye.lerp(ahead, 0.06);
+			rider.position.copy(eye);
+			rider.up.set(0, 1, 0);
+			if (Math.abs(p.dir.z) > 0.97) rider.up.set(1, 0, 0);
+			rider.lookAt(ahead);
+		},
+		{ after: 'simulation' }
+	);
 
 	const dark = $derived(mode.current === 'dark');
 	const { size } = useThrelte();
@@ -49,18 +77,22 @@
 	});
 </script>
 
-<T.PerspectiveCamera makeDefault position={preset.position} fov={38} near={0.05} far={80}>
-	<OrbitControls
-		target={preset.target}
-		enableDamping
-		enabled={!demo}
-		autoRotate={demo}
-		autoRotateSpeed={0.6}
-		maxPolarAngle={Math.PI / 2 - 0.05}
-		minDistance={1}
-		maxDistance={20}
-	/>
-</T.PerspectiveCamera>
+{#if following}
+	<T is={rider} makeDefault />
+{:else}
+	<T.PerspectiveCamera makeDefault position={preset.position} fov={38} near={0.05} far={80}>
+		<OrbitControls
+			target={preset.target}
+			enableDamping
+			enabled={!demo}
+			autoRotate={demo}
+			autoRotateSpeed={0.6}
+			maxPolarAngle={Math.PI / 2 - 0.05}
+			minDistance={1}
+			maxDistance={20}
+		/>
+	</T.PerspectiveCamera>
+{/if}
 
 <Environment intensity={dark ? 0.35 : 0.5} />
 <T.HemisphereLight

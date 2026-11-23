@@ -1,40 +1,59 @@
 import { describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
 import { inverse, toolPose, HOME } from './robot.js';
-import { checkPlan, clampTarget, poseAt, PRESETS, Reach, SNAKE } from './reach.svelte.js';
+import { checkPlan, fieldFor, poseAt, Reach, LEVELS } from './reach.svelte.js';
+import { labyrinth } from './reach/levels.js';
 import { slots, Stack, STANDBY_Q, CONVEYOR } from './stack.svelte.js';
 import { TandemCore, DEFAULT_TANDEM, STRATEGIES } from './tandem.svelte.js';
 
 describe('reach', () => {
-	it('plans every preset within the default bend limit', () => {
-		for (const p of PRESETS) expect(checkPlan(p.target, 28).problem, p.name).toBeNull();
+	it('plans the first three work points of every structure within its default limit', () => {
+		for (const make of LEVELS) {
+			const level = make();
+			for (let i = 0; i < 3; i++)
+				expect(checkPlan(level, i, level.bendLimit).problem, `${level.name} ${i}`).toBeNull();
+		}
 	});
 
-	it('keeps link length along the path', () => {
-		const plan = checkPlan(PRESETS[2].target, 28);
-		const pose = poseAt(plan.path, plan.path.length);
+	it('never routes through the structure', () => {
+		for (const make of LEVELS) {
+			const level = make();
+			level.targets.forEach((_, i) => {
+				const plan = checkPlan(level, i, 90);
+				expect(plan.path, `${level.name} ${i}`).not.toBeNull();
+				expect(plan.minClearance, `${level.name} ${i}`).toBeGreaterThanOrEqual(0);
+			});
+		}
+	});
+
+	it('keeps the link length between joints', () => {
+		const level = LEVELS[2]();
+		const plan = checkPlan(level, 1, level.bendLimit);
+		const pose = poseAt(plan.path!, plan.path!.length, level.links, level.link, fieldFor(level));
 		for (let i = 1; i < pose.joints.length; i++)
-			expect(pose.joints[i].distanceTo(pose.joints[i - 1])).toBeLessThanOrEqual(SNAKE.link + 1e-6);
+			expect(pose.joints[i].distanceTo(pose.joints[i - 1])).toBeLessThanOrEqual(level.link + 1e-6);
 	});
 
-	it('refuses a target that needs too sharp a bend', () => {
-		expect(checkPlan(clampTarget({ x: 0.2, y: -0.4 }), 15).problem).toMatch(/limit/);
+	it('generates a different labyrinth for each seed, and the same one for the same seed', () => {
+		const a = labyrinth(3).solids.length + JSON.stringify(labyrinth(3).targets);
+		const b = labyrinth(3).solids.length + JSON.stringify(labyrinth(3).targets);
+		const c = JSON.stringify(labyrinth(4).targets);
+		expect(a).toBe(b);
+		expect(c).not.toBe(JSON.stringify(labyrinth(3).targets));
 	});
 
-	it('reaches a target, then re-routes to another', () => {
+	it('reaches a work point, then re-routes to another', () => {
 		const r = new Reach();
+		r.setLevel(0);
 		r.go();
-		for (let i = 0; i < 2000 && r.status !== 'arrived'; i++) r.tick(0.05);
+		for (let i = 0; i < 4000 && r.status !== 'arrived'; i++) r.tick(0.05);
 		expect(r.status).toBe('arrived');
-		r.aim(PRESETS[2].target);
+		r.aim(2);
 		r.go();
-		for (let i = 0; i < 4000 && (r.status !== 'arrived' || r.visits < 2); i++) r.tick(0.05);
+		for (let i = 0; i < 6000 && (r.status !== 'arrived' || r.visits < 2); i++) r.tick(0.05);
 		expect(r.visits).toBe(2);
-		expect(
-			r.pose.joints[0].distanceTo(
-				new Vector3(PRESETS[2].target.x, PRESETS[2].target.y, r.pose.joints[0].z)
-			)
-		).toBeLessThan(0.01);
+		const goal = new Vector3(...r.level.targets[2].p);
+		expect(r.pose.joints[0].distanceTo(goal)).toBeLessThan(0.01);
 	});
 });
 

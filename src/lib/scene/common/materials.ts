@@ -153,3 +153,32 @@ export function meshTexture() {
 	mesh.anisotropy = 8;
 	return mesh;
 }
+
+/** Materials for each snake-arm structure: wall surfaces, internal plates and tubes. */
+const structureSets = new Map<
+	string,
+	{ wall: MeshStandardMaterial; plate: MeshStandardMaterial; tube: MeshStandardMaterial }
+>();
+export function structureMaterials(id: string) {
+	let set = structureSets.get(id);
+	if (set) return set;
+	const m = (color: string, roughness: number, metalness: number) =>
+		new MeshStandardMaterial({ color, roughness, metalness });
+	const primer = m('#9fae94', 0.6, 0.3);
+	set =
+		id === 'tank'
+			? { wall: m('#b3ab85', 0.55, 0.25), plate: m('#a59e7a', 0.55, 0.25), tube: primer }
+			: id === 'ducts'
+				? { wall: m('#b9bcba', 0.38, 0.75), plate: m('#b9bcba', 0.38, 0.75), tube: primer }
+				: id === 'exchanger'
+					? {
+							wall: m('#8d9092', 0.45, 0.6),
+							plate: m('#8d9092', 0.45, 0.6),
+							tube: m('#b87a4b', 0.3, 0.9)
+						}
+					: id === 'maze'
+						? { wall: m('#d8d3c7', 0.7, 0.05), plate: m('#d8d3c7', 0.7, 0.05), tube: primer }
+						: { wall: primer, plate: primer, tube: primer };
+	structureSets.set(id, set);
+	return set;
+}

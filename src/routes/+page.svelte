@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import SiteHeader from '#lib/components/site/SiteHeader.svelte';
 	import SiteFooter from '#lib/components/site/SiteFooter.svelte';
 	import DemoTile from '#lib/components/site/DemoTile.svelte';
@@ -9,7 +9,7 @@
 	import StackView from '#lib/scene/stack/View.svelte';
 	import TandemView from '#lib/scene/tandem/View.svelte';
 	import { Simulation } from '#lib/sim/engine.svelte.js';
-	import { PRESETS, Reach, SNAKE } from '#lib/sim/reach.svelte.js';
+	import { LEVELS, Reach } from '#lib/sim/reach.svelte.js';
 	import { Stack } from '#lib/sim/stack.svelte.js';
 	import { Tandem } from '#lib/sim/tandem.svelte.js';
 	import { fixed } from '#lib/format.js';
@@ -32,11 +32,15 @@
 	let timer: ReturnType<typeof setTimeout> | undefined;
 	reach.onArrive = (r) => {
 		timer = setTimeout(() => {
-			r.aim(PRESETS[next++ % PRESETS.length].target);
+			r.aim(next++ % r.level.targets.length);
 			r.go();
 		}, 1500);
 	};
-	reach.go();
+	// The demo explores the duct run; planning only happens in the browser.
+	onMount(() => {
+		reach.setLevel(2);
+		reach.go();
+	});
 	onDestroy(() => clearTimeout(timer));
 
 	const stack = new Stack(true);
@@ -49,7 +53,7 @@
 
 	const figures = $derived({
 		drape: data.drape ? `${data.drape.passed}/${data.drape.plies} in tolerance` : 'No runs yet',
-		reach: `${SNAKE.links} links · ${fixed(SNAKE.links * SNAKE.link, 1)} m`,
+		reach: `${LEVELS.length} structures, one a maze`,
 		stack: data.stack ? `${fixed(data.stack.throughput, 0)} billets/h` : 'No runs yet',
 		tandem: data.tandem ? `×${fixed(data.tandem.speedup, 2)} vs one gantry` : 'No runs yet'
 	});

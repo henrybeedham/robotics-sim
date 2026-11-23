@@ -7,10 +7,10 @@
 		sim,
 		view = 0,
 		demo = false,
-		showTop = true
-	}: { sim: Reach; view?: number; demo?: boolean; showTop?: boolean } = $props();
+		seeThrough = true
+	}: { sim: Reach; view?: number; demo?: boolean; seeThrough?: boolean } = $props();
 </script>
 
 <Viewport {sim} {demo}>
-	<Scene {sim} {view} {demo} {showTop} />
+	<Scene {sim} {view} {demo} {seeThrough} />
 </Viewport>
