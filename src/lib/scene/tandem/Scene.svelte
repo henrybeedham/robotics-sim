@@ -8,9 +8,9 @@
 	let { sim, view = 0, demo = false }: { sim: Tandem; view?: number; demo?: boolean } = $props();
 
 	const views: CameraView[] = [
-		{ position: [6.5, 5.8, 7.5], target: [0, 1.0, 0] },
-		{ position: [0, 11, 0.01], target: [0, 0.8, 0] },
-		{ position: [0, 2.4, 8.5], target: [0, 1.4, 0] }
+		{ position: [8.2, 7.2, 9.6], target: [0, 1.0, 0] },
+		{ position: [0, 14, 0.01], target: [0, 0.8, 0] },
+		{ position: [0, 2.6, 11], target: [0, 1.4, 0] }
 	];
 </script>
 

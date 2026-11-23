@@ -194,7 +194,7 @@ export class TandemCore {
 			{ kind: 'move', to: [kx, 0, TRAVEL_Z], activity: 'pick' },
 			{ kind: 'reserve', span },
 			{ kind: 'move', to: [p.x, p.y, TRAVEL_Z], activity: 'move' },
-			{ kind: 'move', to: [p.x, p.y, surface + 0.02], activity: 'place' },
+			{ kind: 'move', to: [p.x, p.y, surface - 0.02], activity: 'place' },
 			{
 				kind: 'dwell',
 				duration: 0.5,

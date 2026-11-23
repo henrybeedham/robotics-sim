@@ -8,7 +8,8 @@
 	import { ARM } from '#lib/sim/robot.js';
 	import { CUPS, CUP_STROKE } from '#lib/sim/cell.js';
 	import type { Simulation } from '#lib/sim/engine.svelte.js';
-	import { darkPaint, steel, rubber, vacuumOn } from '../common/materials';
+	import { aluminium, bright, castBlack, darkPaint, rubber, vacuumOn } from '../common/materials';
+	import { cyl, rbox, torus } from '../common/shapes';
 
 	let { sim }: { sim: Simulation } = $props();
 
@@ -31,38 +32,85 @@
 	);
 </script>
 
-<!-- Adaptor from the flange to the plate -->
-<T.Mesh position={[-ARM.tool + 0.05, 0, 0]} material={steel} castShadow>
-	<T.BoxGeometry args={[0.1, 0.12, 0.12]} />
-</T.Mesh>
-<T.Mesh position={[plate - 0.03, 0, 0]} material={darkPaint} castShadow>
-	<T.BoxGeometry args={[0.05, 0.66, 0.34]} />
-</T.Mesh>
+<!-- Tool changer and adaptor from the flange to the plate -->
+<T.Mesh
+	position={[-ARM.tool + 0.02, 0, 0]}
+	rotation.z={Math.PI / 2}
+	geometry={cyl(0.07, 0.07, 0.04, 32)}
+	material={castBlack}
+	castShadow
+/>
+<T.Mesh
+	position={[-ARM.tool + 0.065, 0, 0]}
+	geometry={rbox(0.05, 0.14, 0.14, 0.012)}
+	material={aluminium}
+	castShadow
+/>
+<!-- Valve manifold on top of the plate -->
+<T.Mesh
+	position={[plate - 0.075, 0.12, 0]}
+	geometry={rbox(0.05, 0.16, 0.08, 0.008)}
+	material={castBlack}
+	castShadow
+/>
+<T.Mesh
+	position={[plate - 0.075, -0.12, 0]}
+	geometry={rbox(0.05, 0.16, 0.08, 0.008)}
+	material={castBlack}
+	castShadow
+/>
+<!-- Plate: an aluminium sheet stiffened by two profile beams -->
+<T.Mesh
+	position={[plate - 0.03, 0, 0]}
+	geometry={rbox(0.03, 0.68, 0.34, 0.008)}
+	material={aluminium}
+	castShadow
+/>
 {#each [-0.15, 0.15] as v (v)}
-	<T.Mesh position={[plate - 0.07, 0, v]} material={darkPaint} castShadow>
-		<T.BoxGeometry args={[0.04, 0.62, 0.04]} />
-	</T.Mesh>
+	<T.Mesh
+		position={[plate - 0.065, 0, v]}
+		geometry={rbox(0.04, 0.64, 0.04, 0.005)}
+		material={darkPaint}
+		castShadow
+	/>
 {/each}
 
 {#each CUPS as [u, v], i (i)}
 	{@const tip = ext[i]}
-	{@const rod = tip - 0.02 - plate}
+	{@const rod = tip - 0.035 - plate}
+	{@const cupMat = sim.heat > 0.02 ? heated : held ? vacuumOn : rubber}
+	<!-- Actuator body, rod, then a bellows cup -->
 	<T.Mesh
-		position={[plate + rod / 2, u, v]}
+		position={[plate + 0.03, u, v]}
+		rotation.z={Math.PI / 2}
+		geometry={cyl(0.017, 0.017, 0.06, 16)}
+		material={castBlack}
+	/>
+	<T.Mesh
+		position={[plate + 0.03 + rod / 2, u, v]}
 		rotation.z={Math.PI / 2}
 		scale={[1, rod, 1]}
-		material={steel}
-	>
-		<T.CylinderGeometry args={[0.008, 0.008, 1, 10]} />
-	</T.Mesh>
-	<T.Mesh position={[plate + 0.03, u, v]} rotation.z={Math.PI / 2} material={darkPaint}>
-		<T.CylinderGeometry args={[0.016, 0.016, 0.06, 12]} />
-	</T.Mesh>
+		geometry={cyl(0.007, 0.007, 1, 10)}
+		material={bright}
+	/>
 	<T.Mesh
-		position={[tip - 0.01, u, v]}
+		position={[tip - 0.03, u, v]}
 		rotation.z={Math.PI / 2}
-		material={sim.heat > 0.02 ? heated : held ? vacuumOn : rubber}
-	>
-		<T.CylinderGeometry args={[0.022, 0.014, 0.02, 16]} />
-	</T.Mesh>
+		geometry={cyl(0.012, 0.012, 0.01, 12)}
+		material={bright}
+	/>
+	{#each [0.022, 0.012] as o (o)}
+		<T.Mesh
+			position={[tip - o, u, v]}
+			rotation.y={Math.PI / 2}
+			geometry={torus(0.014, 0.0055)}
+			material={cupMat}
+		/>
+	{/each}
+	<T.Mesh
+		position={[tip - 0.004, u, v]}
+		rotation.z={Math.PI / 2}
+		geometry={cyl(0.021, 0.014, 0.008, 18)}
+		material={cupMat}
+	/>
 {/each}

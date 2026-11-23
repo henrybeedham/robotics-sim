@@ -15,6 +15,7 @@
 	import { T, useThrelte } from '@threlte/core';
 	import { OrbitControls, Grid } from '@threlte/extras';
 	import { mode } from 'mode-watcher';
+	import Environment from './Environment.svelte';
 
 	let {
 		views,
@@ -61,8 +62,9 @@
 	/>
 </T.PerspectiveCamera>
 
+<Environment intensity={dark ? 0.35 : 0.5} />
 <T.HemisphereLight
-	args={[dark ? '#d9d2c5' : '#fffaf0', dark ? '#1d1b19' : '#b8afa0', dark ? 1.1 : 1.4]}
+	args={[dark ? '#d9d2c5' : '#fffaf0', dark ? '#1d1b19' : '#b8afa0', dark ? 0.7 : 0.9]}
 />
 <T.DirectionalLight
 	position={[3.5, 7, 2.5]}

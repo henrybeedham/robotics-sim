@@ -13,7 +13,8 @@
 	} from 'three';
 	import { onDestroy } from 'svelte';
 	import { SNAKE, type Reach } from '#lib/sim/reach.svelte.js';
-	import { darkPaint, paint } from '../common/materials';
+	import { castBlack, darkPaint, paint } from '../common/materials';
+	import { cyl, rbox } from '../common/shapes';
 
 	let { sim }: { sim: Reach } = $props();
 
@@ -90,15 +91,42 @@
 	</T.Mesh>
 </T.Group>
 
-<!-- Feed carriage holding the arm's base, running on the rail below -->
+<!-- Feed unit: carriage on the rail, drive housing holding the arm's base, cable bundle out the back -->
 <T.Group position={[base[0], 0, 0]}>
-	<T.Mesh position={[-0.15, 0, base[2]]} material={paint} castShadow>
-		<T.BoxGeometry args={[0.3, 0.24, 0.24]} />
-	</T.Mesh>
-	<T.Mesh position={[-0.15, 0, (0.45 + base[2] - 0.12) / 2]} material={darkPaint} castShadow>
-		<T.BoxGeometry args={[0.08, 0.08, Math.max(0.01, base[2] - 0.12 - 0.45)]} />
-	</T.Mesh>
-	<T.Mesh position={[-0.15, 0, 0.47]} material={darkPaint} castShadow>
-		<T.BoxGeometry args={[0.34, 0.2, 0.06]} />
-	</T.Mesh>
+	<T.Mesh
+		position={[-0.2, 0, base[2]]}
+		geometry={rbox(0.4, 0.26, 0.26, 0.04)}
+		material={paint}
+		castShadow
+	/>
+	<T.Mesh
+		position={[-0.2, 0.16, base[2]]}
+		geometry={rbox(0.24, 0.06, 0.18, 0.02)}
+		material={castBlack}
+	/>
+	<T.Mesh
+		position={[-0.42, 0, base[2]]}
+		rotation.z={Math.PI / 2}
+		geometry={cyl(0.07, 0.07, 0.06, 24)}
+		material={castBlack}
+		castShadow
+	/>
+	<T.Mesh
+		position={[0.01, 0, base[2]]}
+		rotation.z={Math.PI / 2}
+		geometry={cyl(0.045, 0.06, 0.04, 24)}
+		material={castBlack}
+	/>
+	<T.Mesh
+		position={[-0.2, 0, (0.47 + base[2] - 0.13) / 2]}
+		geometry={rbox(0.08, 0.08, Math.max(0.02, base[2] - 0.13 - 0.47), 0.008)}
+		material={darkPaint}
+		castShadow
+	/>
+	<T.Mesh
+		position={[-0.2, 0, 0.49]}
+		geometry={rbox(0.36, 0.22, 0.05, 0.01)}
+		material={darkPaint}
+		castShadow
+	/>
 </T.Group>

@@ -1,7 +1,7 @@
-# Drape design notes
+# Cellwork design notes
 
-**What it is.** A browser simulation of a robotic composite layup cell. A rail-mounted
-six-axis arm uses a conformal vacuum gripper to drape carbon plies onto a curved mould.
+**What it is.** Four browser simulations of industrial robot cells (composite layup, a
+snake arm in a wing box, billet palletising, twin gantries) behind a landing page.
 **Who looks at it.** Engineers and hiring managers at automation companies, on a laptop, for
 a few minutes. **Feeling.** A working process sheet pinned beside a machine: exact, calm,
 legible at a glance. **Reference.** Engineering drawings and the printed traveller sheets
@@ -28,7 +28,18 @@ that go round a composites shop with each part.
   `prefers-reduced-motion` turns them off.
 - **Copy.** British English, plain sentences, no exclamation marks, no emoji.
 
-## 3D scene
+## 3D scenes
+
+- Amber paint is only for robots: arms, the snake arm's feed and gantry A. Gantry B is warm
+  white. Steelwork is structural grey (`structure`), guarding is safety yellow, and machine
+  bases are graphite.
+- Detail parts share cached geometry (`scene/common/shapes.ts`): rounded boxes for
+  castings and profiles, cylinders for motors and hubs. A studio environment map gives
+  metals and clear-coat paint something to reflect.
+- Every cell uses the same `Stage` (camera presets, lights, floor). Landing tiles run it in
+  demo mode: slow auto-orbit, no shadows, 1× pixel ratio.
+
+## Original notes
 
 Modelled Z-up in metres to match the kinematics, then turned Y-up by one group in
 `Scene.svelte`. Materials are shared single instances in `scene/materials.ts`. The robot
