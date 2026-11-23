@@ -109,3 +109,24 @@ describe('tandem', () => {
 		expect(two).toBeLessThan(one * 0.75);
 	});
 });
+
+describe('reach, driven by hand', () => {
+	it('feeds in, stops short of a wall, steers within the bend limit and backs out', () => {
+		const r = new Reach();
+		r.setLevel(0);
+		r.drive();
+		// Straight ahead runs into rib 1, whose hole is off to one side.
+		r.input.feed = 1;
+		for (let i = 0; i < 400 && !r.blocked; i++) r.tick(0.05);
+		expect(r.blocked).toMatch(/Wall/);
+		expect(Math.min(...r.pose.clearance)).toBeGreaterThan(-1);
+		// Back out a little, then feed while steering hard: bends stay inside the limit.
+		r.input.feed = -1;
+		const before = r.tip;
+		for (let i = 0; i < 30; i++) r.tick(0.05);
+		expect(r.tip).toBeLessThan(before);
+		r.input = { feed: 1, turn: -1, climb: 0 };
+		for (let i = 0; i < 40; i++) r.tick(0.05);
+		expect(Math.max(...r.pose.bends)).toBeLessThanOrEqual(r.bendLimit + 1);
+	});
+});

@@ -13,6 +13,7 @@
 	import SiteFooter from '#lib/components/site/SiteFooter.svelte';
 	import PlanMap from '#lib/components/reach/PlanMap.svelte';
 	import BendChart from '#lib/components/reach/BendChart.svelte';
+	import DrivePad from '#lib/components/reach/DrivePad.svelte';
 	import View from '#lib/scene/reach/View.svelte';
 	import { LEVELS, Reach } from '#lib/sim/reach.svelte.js';
 	import { fixed } from '#lib/format.js';
@@ -32,9 +33,13 @@
 
 	const moving = $derived(sim.status === 'advancing' || sim.status === 'retracting');
 	const phase = $derived(
-		{ stowed: 'Stowed', advancing: 'Advancing', retracting: 'Backing out', arrived: 'On station' }[
-			sim.status
-		]
+		{
+			stowed: 'Stowed',
+			advancing: 'Advancing',
+			retracting: 'Backing out',
+			arrived: 'On station',
+			driving: 'Driving by hand'
+		}[sim.status]
 	);
 	const inside = $derived(sim.readout.joints.filter((j) => j.x > 0).length);
 	const worstNow = $derived(Math.max(0, ...sim.readout.bends));
@@ -82,6 +87,7 @@
 				<div>gap {fixed(tipGap, 0)} mm</div>
 				<div>bend {fixed(sim.readout.bends[0] ?? 0, 1)}°</div>
 				<div>{inside}/{sim.links} links in</div>
+				<div class="pt-1 opacity-70">W A S D · Q E to drive</div>
 			</div>
 		{/if}
 	{/snippet}
@@ -171,6 +177,15 @@
 				{#if !sim.plan}Planning…{:else}{sim.plan.problem ??
 						'Route found. Every joint stays inside its limit.'}{/if}
 			</p>
+		</section>
+
+		<section class="space-y-3 border-b p-4">
+			<div class="flex items-baseline justify-between">
+				<h2 class="label">Drive it yourself</h2>
+				{#if sim.status === 'driving'}<span class="text-xs text-primary">Manual</span>{/if}
+			</div>
+			<DrivePad {sim} />
+			{#if sim.blocked}<p class="text-xs text-destructive">{sim.blocked}</p>{/if}
 		</section>
 
 		<Figures

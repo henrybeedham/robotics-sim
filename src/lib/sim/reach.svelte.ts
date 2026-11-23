@@ -136,7 +136,7 @@ function stowedPath(level: Level) {
 	]);
 }
 
-export type ReachStatus = 'stowed' | 'advancing' | 'retracting' | 'arrived';
+export type ReachStatus = 'stowed' | 'advancing' | 'retracting' | 'arrived' | 'driving';
 
 export class Reach {
 	levelIndex = $state(0);
@@ -152,6 +152,12 @@ export class Reach {
 	visits = $state(0);
 	/** Bumped when the structure changes, so scenes rebuild it. */
 	version = $state(0);
+	/** Why manual driving stopped, if it did. */
+	blocked = $state<string | null>(null);
+	/** Hand controls, each −1, 0 or 1: feed (W/S), turn (A/D), climb (Q/E). */
+	input = { feed: 0, turn: 0, climb: 0 };
+	private heading = new Vector3(1, 0, 0);
+	private onTarget = false;
 
 	/** The path the arm is physically on, which can differ from `plan` while it retreats. */
 	active: Path;
@@ -212,6 +218,67 @@ export class Reach {
 		this.status = 'retracting';
 	}
 
+	/**
+	 * Hand over to manual driving from wherever the arm is. The tip then feeds
+	 * along its heading; steering is limited so no joint can exceed the bend
+	 * limit, and the tip stops short of any wall.
+	 */
+	drive() {
+		if (this.status === 'driving') return;
+		this.active = this.active.until(Math.max(this.tip, 0.001));
+		this.tip = this.active.length;
+		this.pending = null;
+		this.heading = this.headingAt(this.tip);
+		this.status = 'driving';
+		this.blocked = null;
+	}
+
+	private headingAt(a: number) {
+		return this.active
+			.at(a)
+			.sub(this.active.at(a - 0.02))
+			.normalize();
+	}
+
+	private driveStep(dt: number) {
+		const { feed, turn, climb } = this.input;
+		if (!feed) return;
+		const step = feed * 0.15 * this.speed * dt;
+		if (step < 0) {
+			this.tip = Math.max(0, this.tip + step);
+			this.heading = this.headingAt(this.tip);
+			this.blocked = null;
+			return;
+		}
+		if (this.tip < this.active.length - 1e-6) {
+			this.active = this.active.until(this.tip);
+			this.tip = this.active.length;
+		}
+		// Steering rate from the bend limit: at most (limit × 0.9) per link length.
+		const kappa = (this.bendLimit * 0.9 * Math.PI) / 180 / this.level.link;
+		const h = this.heading;
+		if (turn) h.applyAxisAngle(new Vector3(0, 0, 1), -turn * kappa * step);
+		if (climb) {
+			const side = new Vector3().crossVectors(h, new Vector3(0, 0, 1));
+			if (side.lengthSq() < 1e-6) side.set(0, 1, 0);
+			h.applyAxisAngle(side.normalize(), climb * kappa * step);
+		}
+		h.normalize();
+		const tipPos = this.active.at(this.tip);
+		const next = tipPos.clone().addScaledVector(h, step);
+		if (this.tip + step > this.links * this.level.link - 0.05) {
+			this.blocked = 'The whole arm is in. Back out (S) to go somewhere else.';
+			return;
+		}
+		if (this.field.at(next.x, next.y, next.z) < SNAKE.radius + 0.004) {
+			this.blocked = 'Wall ahead. Steer away or back out.';
+			return;
+		}
+		this.blocked = null;
+		this.active.append(next);
+		this.tip = this.active.length;
+	}
+
 	retract() {
 		this.pending = null;
 		this.goal = 0;
@@ -226,6 +293,18 @@ export class Reach {
 	tick(dt: number) {
 		dt = Math.min(dt, 0.25);
 		const v = 0.22 * this.speed;
+		if (this.status === 'driving') {
+			this.driveStep(dt);
+			// Count a visit when the tip reaches the chosen work point.
+			const goal = this.level.targets[this.target]?.p;
+			const tipPos = this.active.at(this.tip);
+			const near = goal ? tipPos.distanceTo(new Vector3(...goal)) < 0.05 : false;
+			if (near && !this.onTarget) {
+				this.visits++;
+				this.onArrive?.(this);
+			}
+			this.onTarget = near;
+		}
 		if (this.status === 'advancing' || this.status === 'retracting') {
 			const dir = Math.sign(this.goal - this.tip);
 			const step = Math.min(Math.abs(this.goal - this.tip), v * dt);

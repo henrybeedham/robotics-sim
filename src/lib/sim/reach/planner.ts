@@ -26,6 +26,19 @@ export class Path {
 	get length() {
 		return this.s[this.s.length - 1];
 	}
+	/** Add a point to the end (used when the arm is driven by hand). */
+	append(p: Vector3) {
+		this.s.push(this.length + p.distanceTo(this.points[this.points.length - 1]));
+		this.points.push(p);
+	}
+	/** A copy cut off at arc length `a`. */
+	until(a: number) {
+		const pts: Vector3[] = [];
+		for (let i = 0; i < this.points.length && this.s[i] < a; i++) pts.push(this.points[i].clone());
+		pts.push(this.at(a));
+		if (pts.length < 2) pts.unshift(this.at(a - 0.05));
+		return new Path(pts);
+	}
 	/** Point at arc length `a`. Before the start it extends straight back along the first segment. */
 	at(a: number, out = new Vector3()) {
 		if (a <= 0) {
