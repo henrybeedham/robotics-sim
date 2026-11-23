@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { browser } from '$app/env';
-	import { toggleMode } from 'mode-watcher';
 	import { toast } from 'svelte-sonner';
 	import Play from '@lucide/svelte/icons/play';
 	import Pause from '@lucide/svelte/icons/pause';
 	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
-	import SunMoon from '@lucide/svelte/icons/sun-moon';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Simulation } from '#lib/sim/engine.svelte.js';
 	import { MOULDS, PLY_MASS } from '#lib/sim/cell.js';
@@ -17,6 +15,8 @@
 	import InspectionChart from '#lib/components/drape/InspectionChart.svelte';
 	import Telemetry from '#lib/components/drape/Telemetry.svelte';
 	import type { PageProps } from './$types';
+	import SiteHeader from '#lib/components/site/SiteHeader.svelte';
+	import SiteFooter from '#lib/components/site/SiteFooter.svelte';
 	import type { RunSummary } from '#lib/server/runs.js';
 
 	let { data }: PageProps = $props();
@@ -79,31 +79,10 @@
 </script>
 
 <svelte:head>
-	<title>Drape · composite layup cell simulator</title>
+	<title>Drape · Cellwork</title>
 </svelte:head>
 
-<header class="flex h-12 items-center justify-between border-b px-4">
-	<div class="flex items-baseline gap-3">
-		<span class="font-display text-xl font-semibold tracking-tight">Drape</span>
-		<span class="hidden text-xs text-muted-foreground sm:inline">
-			A robotic composite layup cell, simulated in the browser
-		</span>
-	</div>
-	<nav class="flex items-center gap-1 text-xs">
-		<a href="#how" class="px-2 py-1 hover:underline">How it works</a>
-		<a href="https://github.com/henrybeedham/robotics-sim" class="px-2 py-1 hover:underline">
-			Source
-		</a>
-		<Button
-			variant="ghost"
-			size="icon-sm"
-			onclick={toggleMode}
-			aria-label="Switch light or dark theme"
-		>
-			<SunMoon strokeWidth={1.5} />
-		</Button>
-	</nav>
-</header>
+<SiteHeader current="drape" />
 
 <main class="lg:grid lg:h-[calc(100dvh-3rem)] lg:grid-cols-[minmax(0,1fr)_400px]">
 	<!-- 3D cell -->
@@ -323,12 +302,5 @@
 		{/if}
 	</section>
 
-	<footer class="border-t">
-		<div
-			class="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-4 py-6 text-xs text-muted-foreground"
-		>
-			<span>Built by Henry Beedham as an independent study of automated composite preforming.</span>
-			<span>SvelteKit · Threlte and three.js · SQLite</span>
-		</div>
-	</footer>
+	<SiteFooter />
 </div>

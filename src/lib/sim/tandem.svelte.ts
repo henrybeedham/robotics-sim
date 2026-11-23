@@ -138,11 +138,11 @@ export class TandemCore {
 		this.plies = makePlies(config);
 		this.gantries = KITS.map((kx, i) => ({
 			pos: [kx, 0, TRAVEL_Z] as [number, number, number],
-			reserved: (i === 0 ? [RAILS.x0, kx] : [kx, RAILS.x1]) as [number, number],
+			reserved: i === 0 ? [RAILS.x0, kx] : [kx, RAILS.x1],
 			steps: [],
 			ply: null,
 			busy: 0,
-			activity: 'idle' as Activity,
+			activity: 'idle',
 			since: 0
 		}));
 	}

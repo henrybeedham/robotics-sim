@@ -36,7 +36,14 @@ const MIGRATIONS: (string | ((db: DatabaseSync) => void))[] = [
 		mean_deviation REAL NOT NULL,
 		max_deviation REAL NOT NULL
 	 );
-	 CREATE INDEX runs_created ON runs (created_at DESC);`
+	 CREATE INDEX runs_created ON runs (created_at DESC);`,
+	`CREATE TABLE results (
+		id INTEGER PRIMARY KEY,
+		sim TEXT NOT NULL,
+		created_at TEXT NOT NULL,
+		summary TEXT NOT NULL
+	 );
+	 CREATE INDEX results_sim ON results (sim, id DESC);`
 	// add new migrations here
 ];
 

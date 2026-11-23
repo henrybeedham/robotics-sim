@@ -132,7 +132,7 @@ export class Stack {
 	time = $state(0);
 	warp = $state(2);
 	phase = $state<Phase>('Waiting');
-	billets = $state<Billet[]>([]);
+	billets = $state.raw<Billet[]>([]);
 	stacked = $state(0);
 	missed = $state(0);
 	blocked = $state(0);
@@ -141,7 +141,7 @@ export class Stack {
 
 	q: Joints = [...STANDBY_Q];
 	rail = 0;
-	held: Billet | null = null;
+	held = $state.raw<Billet | null>(null);
 	/** Bumped when billets change state so the renderer can rebuild. */
 	version = $state(0);
 	onComplete?: (s: Stack) => void;
@@ -332,7 +332,7 @@ export class Stack {
 			rest: null,
 			claimed: false
 		};
-		this.billets.push(b);
+		this.billets = [...this.billets, b];
 		this.version++;
 	}
 
